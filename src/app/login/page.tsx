@@ -1,16 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import logo from "../../public/assets/task-mate-logo.jpg";
-import { toast } from "react-hot-toast";
+import logo from "../../../public/assets/task-mate-logo.jpg";
 
-export default function Register() {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
+export default function Login() {
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -22,38 +17,40 @@ export default function Register() {
     }));
   };
 
+  const handleSampleCredentials = () => {
+    setFormData({ username: "test1", password: "test1" });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Something went wrong");
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
-      router.push("/login");
-      toast.success("Account created successfully! Please log in.");
+      localStorage.setItem("token", data.token);
+      router.push("/task");
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/task");
+    }
+  }, []);
 
   return (
     <div
@@ -69,28 +66,10 @@ export default function Register() {
             height={50}
             className="mx-auto mb-2"
           />
-          <h2 className="text-2xl font-bold text-gray-800">
-            Stay Organized, Get More Done.
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">Welcome Back!</h2>
           <p className="text-gray-600 text-sm">
-            Your smart companion for effortless task management.
+            Login to continue managing your tasks.
           </p>
-        </div>
-
-        <button
-          onClick={() => router.push("/login")}
-          className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border py-2 px-4 rounded-lg shadow-sm hover:bg-gray-100"
-        >
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-600">
-            Log in
-          </a>
-        </button>
-
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="mx-2 text-gray-500 text-sm">OR</span>
-          <hr className="flex-grow border-gray-300" />
         </div>
 
         {error && (
@@ -105,7 +84,7 @@ export default function Register() {
               htmlFor="username"
               className="block text-sm font-medium text-gray-700"
             >
-              Enter your personal or work email
+              Email or Username
             </label>
             <input
               type="text"
@@ -138,45 +117,44 @@ export default function Register() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              placeholder="Re-enter your password"
-              onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-orange-700"
-              required
-            />
-          </div>
-
           <button
             type="submit"
             disabled={loading}
             className="w-full text-white py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50"
             style={{ backgroundColor: "#C96442" }}
           >
-            {loading ? "Creating account..." : "Register"}
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+          {/* Sample Credentials Button */}
+          <button
+            type="button"
+            onClick={handleSampleCredentials}
+            className="w-full text-gray-700 py-2 px-4 rounded-md border border-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          >
+            Use Sample Credentials
           </button>
         </form>
 
+        <div className="flex items-center my-4">
+          <hr className="flex-grow border-gray-300" />
+          <span className="mx-2 text-gray-500 text-sm">OR</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
+
+        <button
+          onClick={() => router.push("/")}
+          className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border py-2 px-4 rounded-lg shadow-sm hover:bg-gray-100"
+        >
+          Don't have an account? <span className="text-blue-600">Sign up</span>
+        </button>
+
         <p className="text-center text-xs text-gray-500 mt-4">
-          By continuing, you agree to Anthropic's{" "}
+          By continuing, you agree to our{" "}
           <a href="#" className="text-blue-600 hover:underline">
-            Consumer Terms
+            Terms of Service
           </a>{" "}
           and{" "}
-          <a href="#" className="text-blue-600 hover:underline">
-            Usage Policy
-          </a>
-          , and acknowledge their{" "}
           <a href="#" className="text-blue-600 hover:underline">
             Privacy Policy
           </a>
