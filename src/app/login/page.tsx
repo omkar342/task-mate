@@ -52,7 +52,7 @@ export default function Login() {
     if (token) {
       router.push("/task");
     }
-  }, []);
+  }, [router]);
 
   return (
     <div

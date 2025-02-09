@@ -178,7 +178,11 @@ export default function Task() {
   };
 
   useEffect(() => {
-    fetchTasks();
+    if (localStorage.getItem("token")) {
+      fetchTasks();
+    } else {
+      router.push("/login");
+    }
   }, []);
 
   return (
