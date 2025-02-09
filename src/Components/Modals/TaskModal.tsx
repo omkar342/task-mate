@@ -1,17 +1,31 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 
-const TaskModal = ({ task, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
+interface Task {
+  _id?: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  status: boolean;
+}
+
+interface TaskModalProps {
+  task: Task | null;
+  onClose: () => void;
+  onSave: (formData: Task, taskId?: string) => void;
+}
+
+const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSave }) => {
+  const [formData, setFormData] = useState<Task>({
     title: task?.title || "",
     description: task?.description || "",
     dueDate: task?.dueDate
       ? new Date(task.dueDate).toISOString().split("T")[0]
       : "",
-    status: task?.status === null ? null : task?.status,
+    status: task?.status ?? false, // Ensures `status` is always a boolean
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSave(formData, task?._id);
   };
@@ -74,26 +88,24 @@ const TaskModal = ({ task, onClose, onSave }) => {
             />
           </div>
 
-          {formData && formData.status !== null && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    status: e.target.value === "true",
-                  })
-                }
-                className="w-full border px-3 py-2 rounded-md"
-              >
-                <option value="false">Pending</option>
-                <option value="true">Completed</option>
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              value={formData.status.toString()} // Convert boolean to string
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  status: e.target.value === "true",
+                })
+              }
+              className="w-full border px-3 py-2 rounded-md"
+            >
+              <option value="false">Pending</option>
+              <option value="true">Completed</option>
+            </select>
+          </div>
 
           <div className="flex justify-end space-x-3">
             <button
