@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import logo from "../../../public/assets/task-mate-logo.jpg";
+import { toast } from "react-hot-toast";
 
 export default function Login() {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -11,7 +12,7 @@ export default function Login() {
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -38,6 +39,7 @@ export default function Login() {
 
       localStorage.setItem("token", data.token);
       router.push("/task");
+      toast.success("Logged in successfully!");
     } catch (err: any) {
       setError(err.message);
     } finally {
