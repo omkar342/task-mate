@@ -1,4 +1,5 @@
 import React from "react";
+import { MdEdit, MdDelete } from "react-icons/md";
 
 interface Task {
   _id?: string;
@@ -25,12 +26,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
     : "No Due Date";
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex flex-col h-full">
+    <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200 flex flex-col h-full">
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-semibold text-gray-800">{task.title}</h3>
         <div
           className={`px-3 py-2 rounded-full text-sm ${
-            task.status ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+            task.status
+              ? "bg-green-100 text-green-800"
+              : "bg-yellow-100 text-yellow-800"
           }`}
         >
           {task.status ? "Completed" : "Pending"}
@@ -48,15 +51,17 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
       <div className="mt-auto flex flex-start gap-2">
         <button
           onClick={onEdit}
-          className="px-3 py-1 text-sm border border-[#C05F3C] text-[#C05F3C] rounded hover:bg-[#C05F3C] hover:text-white"
+          className="flex items-center gap-1 px-3 py-1 text-sm border border-[#C05F3C] text-[#C05F3C] rounded-md hover:bg-[#C05F3C] hover:text-white"
         >
-          Edit
+          <span>Edit</span> <MdEdit />
         </button>
+
         <button
           onClick={onDelete}
-          className="px-3 py-1 text-sm border border-red-500 text-red-500 rounded hover:bg-red-500 hover:text-white"
+          className="flex items-center gap-1 px-3 py-1 text-sm border border-red-500 text-red-500 rounded-md hover:bg-red-500 hover:text-white"
         >
-          Delete
+          <span>Delete</span>
+          <MdDelete />
         </button>
       </div>
     </div>
