@@ -1,121 +1,56 @@
-// app/api/tasks/route.ts
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongoose";
 import Task from "@/models/Task";
 import { verifyToken } from "../../../middleware/auth";
 
-// app/api/tasks/[id]/route.ts
-export async function PUT(
-    req: Request,
-    { params }: { params: { id: string } }
-  ) {
-    try {
-      const auth = verifyToken(req);
-      if (!auth.isValid) {
-        return NextResponse.json(
-          { message: "Unauthorized" },
-          { status: 401 }
-        );
-      }
-  
-      await connectToDatabase();
-      const data = await req.json();
+// ✅ Update Task (PUT)
+export async function PUT(req: Request, context: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
 
-      const paramData = await params;
-
-      const taskId = paramData.id;
-
-      const task = await Task.findOneAndUpdate(
-        { _id: taskId, userId: auth.userId },
-        data,
-        { new: true }
-      );
-      
-      if (!task) {
-        return NextResponse.json(
-          { message: "Task not found" },
-          { status: 404 }
-        );
-      }
-      
-      return NextResponse.json(task);
-    } catch (error) {
-      return NextResponse.json(
-        { message: "Error updating task" },
-        { status: 500 }
-      );
+    const auth = await verifyToken(req);
+    if (!auth || !auth.isValid) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-  }
-  
-  export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
-  ) {
-    try {
-      const auth = verifyToken(req);
-      if (!auth.isValid) {
-        return NextResponse.json(
-          { message: "Unauthorized" },
-          { status: 401 }
-        );
-      }
-  
-      await connectToDatabase();
 
-      const paramData = await params;
+    const body = await req.json();
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: context.params.id, userId: auth.userId }, // ✅ Correct `context.params.id`
+      body,
+      { new: true }
+    );
 
-      const taskId = paramData.id;
-      
-      const task = await Task.findOneAndDelete({ 
-        _id: taskId,
-        userId: auth.userId 
-      });
-      
-      if (!task) {
-        return NextResponse.json(
-          { message: "Task not found" },
-          { status: 404 }
-        );
-      }
-      
-      return NextResponse.json({ message: "Task deleted successfully" });
-    } catch (error) {
-      return NextResponse.json(
-        { message: "Error deleting task" },
-        { status: 500 }
-      );
+    if (!updatedTask) {
+      return NextResponse.json({ message: "Task not found" }, { status: 404 });
     }
+
+    return NextResponse.json({ message: "Task updated successfully", task: updatedTask }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error updating task", error: (error as Error).message }, { status: 500 });
   }
+}
 
-//   export async function DELETE(req: Request) {
-//     try {
-//       // Authenticate user
-//       const auth = await verifyToken(req);
-//       if (!auth.isValid) {
-//         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-//       }
+// ✅ Delete Task (DELETE)
+export async function DELETE(req: Request, context: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
 
-//       await connectToDatabase();
-  
-//       // Read task ID from request body
-//       const { id } = await req.json();
-      
-//       if (!id) {
-//         return NextResponse.json({ message: "Task ID is required" }, { status: 400 });
-//       }
-  
-//       // Delete the task where _id matches and belongs to the user
-//       const deletedTask = await Task.findOneAndDelete({ _id: id, userId: auth.userId });
-  
-//       if (!deletedTask) {
-//         return NextResponse.json({ message: "Task not found" }, { status: 404 });
-//       }
-  
-//       return NextResponse.json({ message: "Task deleted successfully" }, { status: 200 });
-//     } catch (error) {
-//       return NextResponse.json(
-//         { message: "Error deleting task", error: (error as Error).message },
-//         { status: 500 }
-//       );
-//     }
-//   }
+    const auth = await verifyToken(req);
+    if (!auth || !auth.isValid) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const deletedTask = await Task.findOneAndDelete({
+      _id: context.params.id, // ✅ Correct `context.params.id`
+      userId: auth.userId,
+    });
+
+    if (!deletedTask) {
+      return NextResponse.json({ message: "Task not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Task deleted successfully" }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error deleting task", error: (error as Error).message }, { status: 500 });
+  }
+}
