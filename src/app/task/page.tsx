@@ -9,16 +9,24 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function Task() {
-  const [tasks, setTasks] = useState([]);
+  interface Task {
+    _id?: string;
+    title: string;
+    description: string;
+    status: boolean;
+    dueDate: string;
+  }
+
+  const [tasks, setTasks] = useState<Task[] | null>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null); // ✅ Explicitly define Task | null
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletingTask, setDeletingTask] = useState(null);
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true); // Loading state
 
   const router = useRouter();
 
-  const handleOpenModal = (task = null) => {
+  const handleOpenModal = (task: Task | null = null) => {
     setEditingTask(task);
     setIsModalOpen(true);
   };
@@ -28,7 +36,7 @@ export default function Task() {
     setIsModalOpen(false);
   };
 
-  const handleOpenDeleteModal = (task = null) => {
+  const handleOpenDeleteModal = (task: Task | null = null) => {
     setDeletingTask(task);
     setIsDeleteModalOpen(true);
   };
@@ -37,14 +45,6 @@ export default function Task() {
     setDeletingTask(null);
     setIsDeleteModalOpen(false);
   };
-
-  interface Task {
-    _id: string;
-    title: string;
-    description: string;
-    status: boolean;
-    dueDate: string;
-  }
 
   const fetchTasks = async () => {
     try {
@@ -109,32 +109,32 @@ export default function Task() {
     }
   };
 
-  const handleToggleStatus = async (taskId: string) => {
-    const task = tasks.find((t: any) => t._id === taskId);
-    if (!task) return;
+  // const handleToggleStatus = async (taskId: string) => {
+  //   const task = tasks.find((t: any) => t._id === taskId);
+  //   if (!task) return;
 
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...task,
-          status: !task.status,
-        }),
-      });
+  //   try {
+  //     setLoading(true);
+  //     const res = await fetch(`/api/tasks/${taskId}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         ...task,
+  //         status: !task.status,
+  //       }),
+  //     });
 
-      if (!res.ok) throw new Error("Failed to update task status");
+  //     if (!res.ok) throw new Error("Failed to update task status");
 
-      fetchTasks();
-    } catch (error) {
-      console.error("Error updating task status:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     fetchTasks();
+  //   } catch (error) {
+  //     console.error("Error updating task status:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleDeleteConfirm = async () => {
     if (!deletingTask) return;
@@ -147,7 +147,7 @@ export default function Task() {
 
     try {
       setLoading(true);
-      const res = await fetch(`/api/tasks/${deletingTask._id}`, {
+      const res = await fetch(`/api/tasks/${deletingTask?._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -156,7 +156,9 @@ export default function Task() {
 
       if (!res.ok) throw new Error("Failed to delete task");
 
-      setTasks(tasks.filter((task: any) => task._id !== deletingTask._id));
+      if (!tasks) return;
+
+      setTasks(tasks.filter((task: Task) => task?._id !== deletingTask?._id));
       handleCloseDeleteModal();
       toast.success("Task deleted successfully!");
     } catch (error) {
@@ -168,12 +170,12 @@ export default function Task() {
 
   const logout = () => {
     try {
-      localStorage.removeItem('token'); // Remove token from storage
-      toast.success('Logged out successfully!');
-      router.push('/login'); // Redirect to login page
+      localStorage.removeItem("token"); // Remove token from storage
+      toast.success("Logged out successfully!");
+      router.push("/login"); // Redirect to login page
     } catch (error) {
-      console.error('Error logging out:', error);
-      toast.error('Error logging out');
+      console.error("Error logging out:", error);
+      toast.error("Error logging out");
     }
   };
 
@@ -212,20 +214,20 @@ export default function Task() {
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-500"></div>
           </div>
-        ) : tasks.length === 0 ? (
+        ) : tasks?.length === 0 ? (
           <>
             <h2 className="text-gray-600 text-center">No tasks found!</h2>
             <h2 className="text-gray-600 text-center">Please add new tasks.</h2>
           </>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tasks.map((task) => (
+            {tasks?.map((task) => (
               <TaskCard
                 key={task._id}
                 task={task}
                 onEdit={() => handleOpenModal(task)}
                 onDelete={() => handleOpenDeleteModal(task)}
-                onToggleStatus={() => handleToggleStatus(task._id)}
+                // onToggleStatus={() => handleToggleStatus(task._id)}
               />
             ))}
           </div>

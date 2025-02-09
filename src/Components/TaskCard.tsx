@@ -1,6 +1,20 @@
 import React from "react";
 
-const TaskCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
+interface Task {
+  _id?: string;
+  title: string;
+  description: string;
+  dueDate?: string;
+  status: boolean;
+}
+
+interface TaskCardProps {
+  task: Task;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
   // Format dueDate for better readability
   const formattedDueDate = task.dueDate
     ? new Date(task.dueDate).toLocaleDateString("en-US", {

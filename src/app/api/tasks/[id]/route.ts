@@ -7,7 +7,7 @@ import { verifyToken } from "../../../middleware/auth";
 // app/api/tasks/[id]/route.ts
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: any }
 ): Promise<NextResponse> {
   try {
     const auth = verifyToken(req);
@@ -43,7 +43,7 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: any }
 ): Promise<NextResponse> {
   try {
     const auth = verifyToken(req);

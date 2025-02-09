@@ -1,7 +1,17 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 
-const DeleteConfirmationModal = ({ task, onClose, onConfirm }) => {
+interface DeleteModalProps {
+  task: { title: string } | null; // ✅ Task must have a `title`
+  onClose: () => void; // ✅ Function that takes no arguments
+  onConfirm: () => void; // ✅ Function that takes no arguments
+}
+
+const DeleteConfirmationModal: React.FC<DeleteModalProps> = ({
+  task,
+  onClose,
+  onConfirm,
+}) => {
   if (!task) return null;
 
   return (
